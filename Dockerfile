@@ -16,9 +16,8 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build - skip database connections during build
+# Build
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV SKIP_DB_CHECK=1
 RUN npm run build
 
 # Runner stage
@@ -34,14 +33,17 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma files for migrations
+# Copy Prisma files
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Create data directory with proper ownership BEFORE switching user
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data && chmod 755 /app/data
+
+# Change ownership of app directory
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -50,5 +52,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Run migrations and start
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
+# Start server directly - Prisma will create DB on first connection
+CMD ["node", "server.js"]
