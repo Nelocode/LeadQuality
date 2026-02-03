@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft, UserPlus, Shield, User as UserIcon } from 'lucide-react';
 import { CreateUserDialog } from '@/components/CreateUserDialog';
 
+export const dynamic = 'force-dynamic';
+
 export default async function UsersPage() {
     const session = await getSession();
     if (!session || session.user.role !== 'admin') {

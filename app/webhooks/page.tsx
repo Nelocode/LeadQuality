@@ -4,6 +4,8 @@ import { ArrowLeft, Copy, Globe, Share2, Activity, Workflow, Webhook, Save } fro
 import { CopyButton } from '@/components/CopyButton';
 import { updateSettings } from '@/app/actions/settings';
 
+export const dynamic = 'force-dynamic';
+
 export default async function WebhooksPage() {
     const webhookConfig = await prisma.systemConfig.findUnique({ where: { key: 'n8n_webhook_url' } });
     const currentWebhook = webhookConfig?.value || "";

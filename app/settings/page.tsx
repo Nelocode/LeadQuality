@@ -3,6 +3,7 @@ import { updateSettings } from '@/app/actions/settings';
 import Link from 'next/link';
 import { ArrowLeft, Save, Users } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
     const promptConfig = await prisma.systemConfig.findUnique({ where: { key: 'scoring_prompt' } });

@@ -1,5 +1,6 @@
 # Base stage
 FROM node:20-alpine AS base
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Dependencies stage
@@ -15,8 +16,9 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build
+# Build - skip database connections during build
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_DB_CHECK=1
 RUN npm run build
 
 # Runner stage
