@@ -1,8 +1,19 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+    if (!openai) {
+        if (!process.env.OPENAI_API_KEY) {
+            throw new Error('OPENAI_API_KEY environment variable is not set');
+        }
+        openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    return openai;
+}
 
 export interface QualificationResult {
     score: number;
@@ -11,7 +22,8 @@ export interface QualificationResult {
 
 export async function qualifyLead(leadData: any, scoringPrompt: string): Promise<QualificationResult> {
     try {
-        const response = await openai.chat.completions.create({
+        const client = getOpenAI();
+        const response = await client.chat.completions.create({
             model: "gpt-4o",
             messages: [
                 {
@@ -43,6 +55,7 @@ export async function qualifyLead(leadData: any, scoringPrompt: string): Promise
     } catch (error) {
         console.error("Error qualifying lead:", error);
         // Fallback in case of error
-        return { score: 0, reason: "Error de conexión o análisis con IA" };
+        return { score: 50, reason: "Error de conexión o análisis con IA - Score por defecto" };
     }
 }
+
